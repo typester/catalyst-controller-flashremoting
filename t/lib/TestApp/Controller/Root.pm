@@ -9,7 +9,6 @@ sub index :Path :AMFGateway { }
 
 sub echo :AMFMethod('echo') {
     my ($self, $c, $args) = @_;
-    warn 'echo';
     return $args;
 }
 
