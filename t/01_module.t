@@ -9,7 +9,7 @@ use lib File::Spec->catfile($FindBin::Bin, 'lib');
 
 use Catalyst::Test 'TestApp';
 
-plan 'no_plan';
+plan tests => 6;
 
 use HTTP::Request;
 

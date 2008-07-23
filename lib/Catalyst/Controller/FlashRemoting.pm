@@ -26,12 +26,12 @@ sub _parse_AMFMethod_attr {
     my $method = $value || $name;
     $self->_amf_method->{ $method } = $self->can($name);
 
-    return;
+    return 'Private';
 }
 
 =head1 NAME
 
-Catalyst::Controller::FlashRemoting - Module abstract (<= 44 characters) goes here
+Catalyst::Controller::FlashRemoting - Catalyst controller for Flash Remoting
 
 =head1 SYNOPSIS
 
@@ -56,11 +56,68 @@ Catalyst::Controller::FlashRemoting - Module abstract (<= 44 characters) goes he
 
 =head1 DESCRIPTION
 
-Stub documentation for this module was created by ExtUtils::ModuleMaker.
-It looks like the author of the extension was negligent enough
-to leave the stub unedited.
+Catalyst::Controller::FlashRemoting is a Catalyst controller that provide easy interface for Flash Remoting.
 
-Blah blah blah.
+Flash Remoting is RPC subsystem and that use AMF (Action Message Format) as message body format.
+
+=head1 USAGE
+
+At first, you need api gateway (endpoint) controller. Add AMFGateway attribute to catalyst action for that.
+
+    sub gateway :Local :AMFGateway { }
+
+If you write above code in Root controller, then 'http://localhost:3000/gateway' is AMF Gateway url.
+
+To use this gateway, write actionscript3 like this:
+
+    var nc:NecConnection = new NetConnection();
+    nc.connect("http://localhost:3000/gateway");
+
+Second, you need create some methods.
+
+    sub echo :AMFMethod {
+        my ($self, $c, $args) = @_;
+        return $args;
+    }
+    
+    sub sum :AMFMethod('sum') {
+        my ($self, $c, $args) = @_;
+    
+        return $args->[0] + $args->[1];
+    }
+
+'echo' is echoback method that just return same object to request, and 'sum' method sum up two arguments and return the result.
+
+To call these methods, write actionscript3 like this:
+
+    nc.call("echo", responder, "foo bar");  // result "foo bar"
+    nc.call("sum", responder, 1, 2);        // result 3
+
+responder is actionscript3's Responder object. see flex/flash docs for detail.
+
+=head1 ACTION ATTRIBUTES
+
+=head2 AMFGateway
+
+This attribute makes the controller to act as AMF Gateway. the controller automatically parse AMF request, dispatch amf method (see AMFMethod attribute below), and serialize response and return.
+
+=head2 AMFMethod($method_name)
+
+This attribute makes the controller to act as AMF Method. This is called from AMFGateway, and don't have to be catalyst controller.
+
+$method_name argument is optional. When no $method_name passed, the actual method name is used as amf method name.
+
+=head1 METHODS
+
+=head2 new
+
+=head2 _parse_AMFGateway_attr
+
+=head2 _parse_AMFMethod_attr
+
+=head1 SEE ALSO
+
+L<Data::AMF>, L<Data::AMF::Packet>.
 
 =head1 AUTHOR
 
