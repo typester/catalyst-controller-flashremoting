@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use base qw/Catalyst::Action/;
 
-use Data::AMF;
+use Data::AMF::Packet;
 
 sub execute {
     my $self = shift;
@@ -12,7 +12,7 @@ sub execute {
     if ($c->req->content_type eq 'application/x-amf' and my $body = $c->req->body) {
         my $data = do { local $/; <$body> };
 
-        my $request = Data::AMF->deserialize_packet($data);
+        my $request = Data::AMF::Packet->deserialize($data);
 
         my @results;
         for my $message (@{ $request->messages }) {
@@ -27,14 +27,14 @@ sub execute {
             }
         }
 
-        my $response = Data::AMF->serialize_packet(
+        my $response = Data::AMF::Packet->new(
             version  => $request->version,
             headers  => [],
             messages => \@results,
         );
 
         $c->res->content_type('application/x-amf');
-        $c->res->body( $response );
+        $c->res->body( $response->serialize );
     }
     else {
         $c->res->status(500);
