@@ -5,7 +5,7 @@ use base 'Catalyst::Controller';
 
 __PACKAGE__->mk_accessors(qw/_amf_method/);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub new {
     my $self = shift->NEXT::new(@_);

@@ -19,8 +19,17 @@ sub execute {
             my $method = $controller->_amf_method->{ $message->target_uri };
 
             if ($method) {
-                my $res = $method->($controller, $c, $message->value);
-                push @results, $message->result($res);
+                my $res;
+                eval {
+                    $res = $method->($controller, $c, $message->value);
+                };
+                if ($@) {
+                    (my $res = $@) =~ s/ at.*?$//;
+                    push @results, $message->error($res);
+                }
+                else {
+                    push @results, $message->result($res);
+                }
             }
             else {
                 $c->log->error(qq{method for "@{[ $message->target_uri ]}" does not exist});
